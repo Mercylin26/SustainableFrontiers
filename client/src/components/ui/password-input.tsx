@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { Input } from "@/components/ui/input";
 
 interface PasswordInputProps {
@@ -9,32 +9,37 @@ interface PasswordInputProps {
   name?: string;
 }
 
-export function PasswordInput({ id, placeholder, value, onChange, name, ...props }: PasswordInputProps & React.InputHTMLAttributes<HTMLInputElement>) {
-  const [showPassword, setShowPassword] = useState(false);
+export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps & React.InputHTMLAttributes<HTMLInputElement>>(
+  ({ id, placeholder, value, onChange, name, ...props }, ref) => {
+    const [showPassword, setShowPassword] = useState(false);
 
-  return (
-    <div className="relative">
-      <Input
-        id={id}
-        type={showPassword ? "text" : "password"}
-        placeholder={placeholder || "•••••••••"}
-        value={value}
-        onChange={onChange}
-        name={name}
-        {...props}
-      />
-      <button
-        type="button"
-        className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-neutral-500"
-        onClick={() => setShowPassword(!showPassword)}
-      >
-        <span className="material-icons text-lg">
-          {showPassword ? "visibility_off" : "visibility"}
-        </span>
-      </button>
-    </div>
-  );
-}
+    return (
+      <div className="relative">
+        <Input
+          ref={ref}
+          id={id}
+          type={showPassword ? "text" : "password"}
+          placeholder={placeholder || "•••••••••"}
+          value={value}
+          onChange={onChange}
+          name={name}
+          {...props}
+        />
+        <button
+          type="button"
+          className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 text-neutral-500"
+          onClick={() => setShowPassword(!showPassword)}
+        >
+          <span className="material-icons text-lg">
+            {showPassword ? "visibility_off" : "visibility"}
+          </span>
+        </button>
+      </div>
+    );
+  }
+);
+
+PasswordInput.displayName = "PasswordInput";
 
 export function PasswordField() {
   const [showPassword, setShowPassword] = useState(false);
