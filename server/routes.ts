@@ -73,8 +73,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/users", async (req, res) => {
     try {
-      const { role, department, year } = req.query;
+      const { role, department, year, email } = req.query;
       
+      if (email) {
+        // If email is provided, fetch user by email
+        const user = await storage.getUserByEmail(email as string);
+        if (user) {
+          res.json({ users: [{ ...user, password: undefined }] });
+        } else {
+          res.json({ users: [] });
+        }
+        return;
+      }
+      
+      // Otherwise, get users by role, department, and year
       const users = await storage.getUsers({
         role: role as string,
         department: department as string,

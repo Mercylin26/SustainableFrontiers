@@ -49,25 +49,64 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          // For demo purposes, we'll create a custom user with role and other properties
-          // In a real app, you would fetch this data from your database
-          const customUser: CustomUser = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            // Default to student role, should be fetched from database in real app
-            role: "student",
-            firstName: firebaseUser.displayName?.split(' ')[0] || "User",
-            lastName: firebaseUser.displayName?.split(' ')[1] || "",
-            department: "cse",
-            year: "1",
-            collegeId: `STU${Math.floor(1000 + Math.random() * 9000)}`
-          };
-          
-          // In a real implementation, you would fetch actual user data from your database
-          // Example: const userData = await fetchUserProfile(firebaseUser.uid);
-          
-          setUser(customUser);
+          // Fetch user data from our database if available
+          try {
+            const response = await fetch(`/api/users?email=${firebaseUser.email}`);
+            const data = await response.json();
+            
+            if (response.ok && data.users && data.users.length > 0) {
+              // Use the database user data to create a custom user
+              const dbUser = data.users[0];
+              
+              const customUser: CustomUser = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                role: dbUser.role,
+                firstName: dbUser.firstName,
+                lastName: dbUser.lastName,
+                department: dbUser.department,
+                year: dbUser.year,
+                position: dbUser.position,
+                collegeId: dbUser.collegeId,
+                profilePicture: dbUser.profilePicture
+              };
+              
+              setUser(customUser);
+            } else {
+              // Fallback to basic info if user not found in database
+              const customUser: CustomUser = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email,
+                displayName: firebaseUser.displayName,
+                role: "student", // Default role
+                firstName: firebaseUser.displayName?.split(' ')[0] || "User",
+                lastName: firebaseUser.displayName?.split(' ')[1] || "",
+                department: "cse", // Default department
+                year: "1",
+                collegeId: `STU${Math.floor(1000 + Math.random() * 9000)}`
+              };
+              
+              setUser(customUser);
+            }
+          } catch (dbError) {
+            console.error("Error fetching user data from database:", dbError);
+            
+            // Fallback to basic info if database fetch fails
+            const customUser: CustomUser = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              displayName: firebaseUser.displayName,
+              role: "student", // Default role
+              firstName: firebaseUser.displayName?.split(' ')[0] || "User",
+              lastName: firebaseUser.displayName?.split(' ')[1] || "",
+              department: "cse", // Default department
+              year: "1",
+              collegeId: `STU${Math.floor(1000 + Math.random() * 9000)}`
+            };
+            
+            setUser(customUser);
+          }
         } else {
           setUser(null);
         }
@@ -87,6 +126,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setLoading(true);
       
+      // First, authenticate with Firebase
       const result = await loginWithEmailAndPassword(email, password);
       
       if (result.error) {
@@ -96,6 +136,49 @@ export function AuthProvider({ children }: AuthProviderProps) {
           variant: "destructive",
         });
         return { error: result.error };
+      }
+      
+      // Then fetch the user data from our backend database
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          // Continue with Firebase login if database login fails
+          console.error("Failed to fetch user details from database:", data.error);
+        } else {
+          // Enhance the custom user with data from our database
+          const dbUser = data.user;
+          
+          if (dbUser && result.user) {
+            // Update the user state with database details
+            const customUser: CustomUser = {
+              uid: result.user.uid,
+              email: result.user.email,
+              displayName: result.user.displayName,
+              role: dbUser.role,
+              firstName: dbUser.firstName,
+              lastName: dbUser.lastName,
+              department: dbUser.department,
+              year: dbUser.year,
+              position: dbUser.position,
+              collegeId: dbUser.collegeId,
+              profilePicture: dbUser.profilePicture
+            };
+            
+            setUser(customUser);
+          }
+        }
+      } catch (dbError) {
+        // Continue with Firebase login if database login fails
+        console.error("Failed to fetch user details from database:", dbError);
       }
       
       toast({
@@ -116,9 +199,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       setLoading(true);
       
-      const { email, password, firstName, lastName, role } = userData;
+      const { email, password, firstName, lastName, role, collegeId, department, year, position } = userData;
       const displayName = `${firstName} ${lastName}`;
       
+      // First, register with Firebase
       const result = await registerWithEmailAndPassword(email, password, displayName);
       
       if (result.error) {
@@ -128,6 +212,40 @@ export function AuthProvider({ children }: AuthProviderProps) {
           variant: "destructive",
         });
         return { error: result.error };
+      }
+      
+      // Then save the user data to our backend database
+      try {
+        // Convert the userData to match the schema required by the API
+        const userDataForDB = {
+          email,
+          password,
+          firstName,
+          lastName,
+          collegeId,
+          role,
+          department,
+          year: role === "student" ? year : null,
+          position: role === "faculty" ? position : null,
+          profilePicture: null
+        };
+        
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userDataForDB),
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to save user data to database');
+        }
+      } catch (dbError: any) {
+        // If database storage fails, continue with Firebase auth but log the error
+        console.error("Failed to save user to database:", dbError);
       }
       
       toast({
