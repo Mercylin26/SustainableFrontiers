@@ -1,3 +1,5 @@
+import { eq, inArray, gte, lte, count } from "drizzle-orm";
+import { db } from "./db";
 import { 
   users, 
   departments, 
@@ -20,7 +22,8 @@ import {
   type InsertEvent,
   type Note,
   type InsertNote,
-  UserRole
+  UserRole,
+  type UserRoleType
 } from "@shared/schema";
 import { randomBytes } from "crypto";
 
@@ -507,4 +510,332 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async getUserByCollegeId(collegeId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.collegeId, collegeId));
+    return user;
+  }
+
+  async getUsers(options: { role?: string; department?: string; year?: string } = {}): Promise<User[]> {
+    let query = db.select().from(users);
+    
+    if (options.role) {
+      query = query.where(eq(users.role, options.role as UserRoleType));
+    }
+    
+    if (options.department) {
+      query = query.where(eq(users.department, options.department));
+    }
+    
+    if (options.year) {
+      query = query.where(eq(users.year, options.year));
+    }
+    
+    return await query;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  // Department methods
+  async getDepartment(id: number): Promise<Department | undefined> {
+    const [department] = await db.select().from(departments).where(eq(departments.id, id));
+    return department;
+  }
+
+  async getDepartmentByCode(code: string): Promise<Department | undefined> {
+    const [department] = await db.select().from(departments).where(eq(departments.code, code));
+    return department;
+  }
+
+  async getDepartments(): Promise<Department[]> {
+    return await db.select().from(departments);
+  }
+
+  async createDepartment(insertDepartment: InsertDepartment): Promise<Department> {
+    const [department] = await db.insert(departments).values(insertDepartment).returning();
+    return department;
+  }
+
+  // Subject methods
+  async getSubject(id: number): Promise<Subject | undefined> {
+    const [subject] = await db.select().from(subjects).where(eq(subjects.id, id));
+    return subject;
+  }
+
+  async getSubjectByCode(code: string): Promise<Subject | undefined> {
+    const [subject] = await db.select().from(subjects).where(eq(subjects.code, code));
+    return subject;
+  }
+
+  async getSubjects(options: { departmentId?: number; year?: string; facultyId?: number } = {}): Promise<Subject[]> {
+    let query = db.select().from(subjects);
+    
+    if (options.departmentId) {
+      query = query.where(eq(subjects.departmentId, options.departmentId));
+    }
+    
+    if (options.year) {
+      query = query.where(eq(subjects.year, options.year));
+    }
+    
+    if (options.facultyId) {
+      // For faculty subjects, we need to join with timetable_entries
+      // This is a more complex query that filters subjects taught by a faculty
+      const subjectsForFaculty = await db
+        .select({ subjectId: timetableEntries.subjectId })
+        .from(timetableEntries)
+        .where(eq(timetableEntries.facultyId, options.facultyId));
+      
+      const subjectIds = [...new Set(subjectsForFaculty.map(entry => entry.subjectId))];
+      
+      if (subjectIds.length > 0) {
+        query = query.where(inArray(subjects.id, subjectIds));
+      } else {
+        return []; // No subjects for this faculty
+      }
+    }
+    
+    return await query;
+  }
+
+  async createSubject(insertSubject: InsertSubject): Promise<Subject> {
+    const [subject] = await db.insert(subjects).values(insertSubject).returning();
+    return subject;
+  }
+
+  // Timetable methods
+  async getTimetableEntries(options: { subjectId?: number; facultyId?: number; dayOfWeek?: string } = {}): Promise<TimetableEntry[]> {
+    let query = db.select().from(timetableEntries);
+    
+    if (options.subjectId) {
+      query = query.where(eq(timetableEntries.subjectId, options.subjectId));
+    }
+    
+    if (options.facultyId) {
+      query = query.where(eq(timetableEntries.facultyId, options.facultyId));
+    }
+    
+    if (options.dayOfWeek) {
+      query = query.where(eq(timetableEntries.dayOfWeek, options.dayOfWeek));
+    }
+    
+    return await query;
+  }
+
+  async createTimetableEntry(insertEntry: InsertTimetableEntry): Promise<TimetableEntry> {
+    const [entry] = await db.insert(timetableEntries).values(insertEntry).returning();
+    return entry;
+  }
+
+  // Attendance methods
+  async getAttendanceRecords(options: { subjectId?: number; studentId?: number; facultyId?: number; date?: string } = {}): Promise<AttendanceRecord[]> {
+    let query = db.select().from(attendanceRecords);
+    
+    if (options.subjectId) {
+      query = query.where(eq(attendanceRecords.subjectId, options.subjectId));
+    }
+    
+    if (options.studentId) {
+      query = query.where(eq(attendanceRecords.studentId, options.studentId));
+    }
+    
+    if (options.facultyId) {
+      // For records marked by a specific faculty, join with subjects and timetable_entries
+      const entriesForFaculty = await db
+        .select({ subjectId: timetableEntries.subjectId })
+        .from(timetableEntries)
+        .where(eq(timetableEntries.facultyId, options.facultyId));
+      
+      const subjectIds = [...new Set(entriesForFaculty.map(entry => entry.subjectId))];
+      
+      if (subjectIds.length > 0) {
+        query = query.where(inArray(attendanceRecords.subjectId, subjectIds));
+      } else {
+        return []; // No attendance records for this faculty
+      }
+    }
+    
+    if (options.date) {
+      query = query.where(eq(attendanceRecords.date, options.date));
+    }
+    
+    return await query;
+  }
+
+  async createAttendanceRecord(insertRecord: InsertAttendanceRecord): Promise<AttendanceRecord> {
+    const [record] = await db.insert(attendanceRecords).values(insertRecord).returning();
+    return record;
+  }
+
+  async getStudentAttendanceSummary(studentId: number): Promise<{ subjectId: number; subjectName: string; percentage: number }[]> {
+    // Get all subjects the student is taking
+    const studentSubjects = await db
+      .select({
+        id: subjects.id,
+        name: subjects.name,
+      })
+      .from(subjects)
+      .innerJoin(attendanceRecords, eq(subjects.id, attendanceRecords.subjectId))
+      .where(eq(attendanceRecords.studentId, studentId))
+      .groupBy(subjects.id, subjects.name);
+
+    // Calculate attendance percentage for each subject
+    const result = await Promise.all(
+      studentSubjects.map(async (subject) => {
+        // Count total classes for this subject
+        const totalClassesResult = await db
+          .select({ count: count() })
+          .from(attendanceRecords)
+          .where(eq(attendanceRecords.subjectId, subject.id))
+          .groupBy(attendanceRecords.date);
+
+        const totalClasses = totalClassesResult.length;
+
+        // Count classes attended by the student
+        const attendedClassesResult = await db
+          .select({ count: count() })
+          .from(attendanceRecords)
+          .where(eq(attendanceRecords.subjectId, subject.id))
+          .where(eq(attendanceRecords.studentId, studentId))
+          .where(eq(attendanceRecords.status, "present"));
+
+        const attendedClasses = attendedClassesResult[0]?.count || 0;
+        
+        // Calculate percentage
+        const percentage = totalClasses > 0 ? (attendedClasses / totalClasses) * 100 : 0;
+
+        return {
+          subjectId: subject.id,
+          subjectName: subject.name,
+          percentage: Math.round(percentage),
+        };
+      })
+    );
+
+    return result;
+  }
+
+  // Manage QR code generation and attendance marking
+  private qrCodes = new Map<string, { facultyId: number; subjectId: number; date: string; expiresAt: number }>();
+
+  async generateAttendanceQrCode(facultyId: number, subjectId: number, date: string): Promise<string> {
+    // Generate a random QR code
+    const qrCode = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    // QR code expires in 5 minutes
+    const expiresAt = Date.now() + 5 * 60 * 1000;
+    
+    this.qrCodes.set(qrCode, { facultyId, subjectId, date, expiresAt });
+    
+    return qrCode;
+  }
+
+  async markAttendanceByQrCode(qrCode: string, studentId: number): Promise<{ success: boolean; message: string }> {
+    const qrData = this.qrCodes.get(qrCode);
+    
+    if (!qrData) {
+      return { success: false, message: "Invalid QR code" };
+    }
+    
+    if (Date.now() > qrData.expiresAt) {
+      this.qrCodes.delete(qrCode);
+      return { success: false, message: "QR code has expired" };
+    }
+    
+    // Check if this student has already marked attendance for this class
+    const existingRecord = await db
+      .select()
+      .from(attendanceRecords)
+      .where(eq(attendanceRecords.subjectId, qrData.subjectId))
+      .where(eq(attendanceRecords.studentId, studentId))
+      .where(eq(attendanceRecords.date, qrData.date));
+    
+    if (existingRecord.length > 0) {
+      return { success: false, message: "Attendance already marked for this class" };
+    }
+    
+    // Mark attendance as present
+    await this.createAttendanceRecord({
+      subjectId: qrData.subjectId,
+      studentId,
+      date: qrData.date,
+      status: "present",
+    });
+    
+    return { success: true, message: "Attendance marked successfully" };
+  }
+
+  // Event methods
+  async getEvent(id: number): Promise<Event | undefined> {
+    const [event] = await db.select().from(events).where(eq(events.id, id));
+    return event;
+  }
+
+  async getEvents(options: { facultyId?: number; departmentId?: number; year?: string; startDate?: string; endDate?: string } = {}): Promise<Event[]> {
+    let query = db.select().from(events);
+    
+    if (options.facultyId) {
+      query = query.where(eq(events.facultyId, options.facultyId));
+    }
+    
+    if (options.departmentId) {
+      query = query.where(eq(events.departmentId, options.departmentId));
+    }
+    
+    if (options.year) {
+      query = query.where(eq(events.targetYear, options.year));
+    }
+    
+    if (options.startDate) {
+      query = query.where(gte(events.startDate, options.startDate));
+    }
+    
+    if (options.endDate) {
+      query = query.where(lte(events.endDate, options.endDate));
+    }
+    
+    return await query;
+  }
+
+  async createEvent(insertEvent: InsertEvent): Promise<Event> {
+    const [event] = await db.insert(events).values(insertEvent).returning();
+    return event;
+  }
+
+  // Notes methods
+  async getNotes(options: { subjectId?: number; facultyId?: number } = {}): Promise<Note[]> {
+    let query = db.select().from(notes);
+    
+    if (options.subjectId) {
+      query = query.where(eq(notes.subjectId, options.subjectId));
+    }
+    
+    if (options.facultyId) {
+      query = query.where(eq(notes.facultyId, options.facultyId));
+    }
+    
+    return await query;
+  }
+
+  async createNote(insertNote: InsertNote): Promise<Note> {
+    const [note] = await db.insert(notes).values(insertNote).returning();
+    return note;
+  }
+}
+
+// Use database storage instead of memory storage
+export const storage = new DatabaseStorage();
