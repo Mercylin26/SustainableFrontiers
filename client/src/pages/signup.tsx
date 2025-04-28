@@ -55,6 +55,7 @@ export default function Signup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { signup, loading } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -267,9 +268,27 @@ export default function Signup() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <div className="flex justify-between items-center">
+                      <FormLabel>Password</FormLabel>
+                      <div className="flex items-center space-x-1">
+                        <input 
+                          type="checkbox" 
+                          id="show-password" 
+                          checked={showPassword}
+                          onChange={() => setShowPassword(!showPassword)}
+                          className="rounded text-primary focus:ring-primary"
+                        />
+                        <label htmlFor="show-password" className="text-xs text-neutral-500 cursor-pointer">
+                          Show password
+                        </label>
+                      </div>
+                    </div>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="•••••••••" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -283,7 +302,11 @@ export default function Signup() {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="•••••••••" 
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
