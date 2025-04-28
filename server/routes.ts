@@ -1,6 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import { 
   insertUserSchema, 
   insertDepartmentSchema, 
@@ -24,36 +25,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return { error: String(error) };
   };
 
-  // AUTH ROUTES
-  app.post("/api/auth/register", async (req, res) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      const user = await storage.createUser(userData);
-      res.json({ user: { ...user, password: undefined } });
-    } catch (error) {
-      res.status(400).json(handleZodError(error));
-    }
-  });
-
-  app.post("/api/auth/login", async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ error: "Email and password are required" });
-      }
-      
-      const user = await storage.getUserByEmail(email);
-      
-      if (!user || user.password !== password) {
-        return res.status(401).json({ error: "Invalid email or password" });
-      }
-      
-      res.json({ user: { ...user, password: undefined } });
-    } catch (error) {
-      res.status(500).json({ error: String(error) });
-    }
-  });
+  // Set up authentication routes
+  setupAuth(app);
 
   // USER ROUTES
   app.get("/api/users/:id", async (req, res) => {
