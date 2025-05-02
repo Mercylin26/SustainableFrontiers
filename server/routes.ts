@@ -248,6 +248,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: String(error) });
     }
   });
+  
+  app.post("/api/attendance/mark", async (req, res) => {
+    try {
+      const { qrCode, studentId } = req.body;
+      
+      if (!qrCode || !studentId) {
+        return res.status(400).json({ error: "QR code and student ID are required" });
+      }
+      
+      const result = await storage.markAttendanceByQrCode(qrCode, parseInt(studentId));
+      
+      if (!result.success) {
+        return res.status(400).json({ error: result.message });
+      }
+      
+      res.json({ success: true, message: result.message });
+    } catch (error) {
+      res.status(500).json({ error: String(error) });
+    }
+  });
 
   // EVENT ROUTES
   app.post("/api/events", async (req, res) => {

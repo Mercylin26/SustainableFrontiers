@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import QRCode from "@/components/ui/qr-code";
+import QRScanner from "@/components/ui/qr-scanner";
 import { format } from "date-fns";
 import { calculateAttendanceStatus } from "@/lib/utils";
 
@@ -90,12 +91,17 @@ export default function StudentAttendance() {
             <div className="mb-4 md:mb-0">
               <h3 className="font-medium mb-1">Scan the QR code</h3>
               <p className="text-sm text-neutral-600">Use the QR code provided by your professor to mark your attendance.</p>
-              <Button className="mt-3">
-                <span className="material-icons mr-2">camera_alt</span>
-                Scan QR Code
-              </Button>
+              <QRScanner 
+                studentId={user?.id || 0}
+                onSuccess={() => {
+                  // Refresh the attendance data
+                  window.location.reload();
+                }}
+              />
             </div>
-            <QRCode size={120} />
+            <div className="hidden md:block">
+              <QRCode size={120} />
+            </div>
           </CardContent>
         </Card>
       </div>
