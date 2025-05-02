@@ -196,4 +196,19 @@ export function setupAuth(app: Express) {
     }
     next();
   });
+  
+  // Admin role check middleware
+  app.use("/api/admin/*", (req, res, next) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    // Only allow access to users with the admin role
+    const user = req.user as Express.User;
+    if (user.role !== 'admin') {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    next();
+  });
 }

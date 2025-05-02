@@ -73,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // DEPARTMENT ROUTES
-  app.post("/api/departments", async (req, res) => {
+  app.post("/api/admin/departments", async (req, res) => {
     try {
       const departmentData = insertDepartmentSchema.parse(req.body);
       const department = await storage.createDepartment(departmentData);
@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // SUBJECT ROUTES
-  app.post("/api/protected/subjects", async (req, res) => {
+  app.post("/api/admin/subjects", async (req, res) => {
     try {
       const subjectData = insertSubjectSchema.parse(req.body);
       const subject = await storage.createSubject(subjectData);
@@ -150,9 +150,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // TIMETABLE ROUTES
-  app.post("/api/protected/timetable", async (req, res) => {
+  app.post("/api/admin/timetable", async (req, res) => {
     try {
       const entryData = insertTimetableEntrySchema.parse(req.body);
+      const entry = await storage.createTimetableEntry(entryData);
+      res.json({ entry });
+    } catch (error) {
+      res.status(400).json(handleZodError(error));
+    }
+  });
+  
+  // Faculty can create their own timetable entries
+  app.post("/api/protected/timetable", async (req, res) => {
+    try {
+      const user = req.user as Express.User;
+      const entryData = insertTimetableEntrySchema.parse({
+        ...req.body,
+        facultyId: user.id // Ensure the faculty ID is set to the current user's ID
+      });
+      
       const entry = await storage.createTimetableEntry(entryData);
       res.json({ entry });
     } catch (error) {
@@ -177,9 +193,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ATTENDANCE ROUTES
-  app.post("/api/protected/attendance", async (req, res) => {
+  app.post("/api/admin/attendance", async (req, res) => {
     try {
       const attendanceData = insertAttendanceRecordSchema.parse(req.body);
+      const record = await storage.createAttendanceRecord(attendanceData);
+      res.json({ record });
+    } catch (error) {
+      res.status(400).json(handleZodError(error));
+    }
+  });
+  
+  // Faculty can record attendance for their own courses
+  app.post("/api/protected/attendance", async (req, res) => {
+    try {
+      const user = req.user as Express.User;
+      const attendanceData = insertAttendanceRecordSchema.parse({
+        ...req.body,
+        facultyId: user.id // Ensure the faculty ID is set to the current user's ID
+      });
+      
       const record = await storage.createAttendanceRecord(attendanceData);
       res.json({ record });
     } catch (error) {
@@ -216,14 +248,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/protected/attendance/qr-code", async (req, res) => {
     try {
-      const { facultyId, subjectId, date } = req.body;
+      const user = req.user as Express.User;
+      const { subjectId, date } = req.body;
       
-      if (!facultyId || !subjectId || !date) {
-        return res.status(400).json({ error: "Faculty ID, Subject ID, and date are required" });
+      if (!subjectId || !date) {
+        return res.status(400).json({ error: "Subject ID and date are required" });
       }
       
       const qrCode = await storage.generateAttendanceQrCode(
-        parseInt(facultyId), 
+        user.id, // Use the authenticated faculty member's ID
         parseInt(subjectId), 
         date
       );
@@ -270,9 +303,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // EVENT ROUTES
-  app.post("/api/protected/events", async (req, res) => {
+  app.post("/api/admin/events", async (req, res) => {
     try {
       const eventData = insertEventSchema.parse(req.body);
+      const event = await storage.createEvent(eventData);
+      res.json({ event });
+    } catch (error) {
+      res.status(400).json(handleZodError(error));
+    }
+  });
+  
+  // Faculty can create events
+  app.post("/api/protected/events", async (req, res) => {
+    try {
+      const user = req.user as Express.User;
+      const eventData = insertEventSchema.parse({
+        ...req.body,
+        facultyId: user.id // Ensure the faculty ID is set to the current user's ID
+      });
+      
       const event = await storage.createEvent(eventData);
       res.json({ event });
     } catch (error) {
@@ -314,9 +363,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // NOTES ROUTES
-  app.post("/api/protected/notes", async (req, res) => {
+  app.post("/api/admin/notes", async (req, res) => {
     try {
       const noteData = insertNoteSchema.parse(req.body);
+      const note = await storage.createNote(noteData);
+      res.json({ note });
+    } catch (error) {
+      res.status(400).json(handleZodError(error));
+    }
+  });
+  
+  // Faculty can upload notes for their courses
+  app.post("/api/protected/notes", async (req, res) => {
+    try {
+      const user = req.user as Express.User;
+      const noteData = insertNoteSchema.parse({
+        ...req.body,
+        facultyId: user.id // Ensure the faculty ID is set to the current user's ID
+      });
+      
       const note = await storage.createNote(noteData);
       res.json({ note });
     } catch (error) {
