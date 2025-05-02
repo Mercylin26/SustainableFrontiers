@@ -123,7 +123,7 @@ export default function StudentAttendance() {
                       <SelectValue placeholder="Select Subject" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Subjects</SelectItem>
+                      <SelectItem value="all">All Subjects</SelectItem>
                       {subjectsData?.subjects?.map((subject: any) => (
                         <SelectItem key={subject.id} value={subject.id.toString()}>
                           {subject.name}
