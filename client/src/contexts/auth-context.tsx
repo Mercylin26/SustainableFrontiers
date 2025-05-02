@@ -240,6 +240,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // Create a basic user profile from Firebase user
             const customUser: CustomUser = {
               uid: result.user.uid,
+              id: -1, // Placeholder ID for Firebase-only users
               email: result.user.email,
               displayName: result.user.displayName,
               role: "student", // Default role
@@ -332,9 +333,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Create a custom user object from the database response
         const customUser: CustomUser = {
           uid: `local-${data.user.id}`, // Generate a placeholder UID
+          id: data.user.id,
           email: data.user.email,
           displayName: `${data.user.firstName} ${data.user.lastName}`,
-          role: data.user.role as "student" | "faculty",
+          role: data.user.role as "student" | "faculty" | "admin",
           firstName: data.user.firstName,
           lastName: data.user.lastName,
           department: data.user.department,
@@ -396,6 +398,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const logout = async () => {
     try {
       setLoading(true);
+      
+      // Log out from server session
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include', // Important for session cookies
+        });
+      } catch (serverError) {
+        console.error("Server logout failed:", serverError);
+      }
       
       // Clear user from state and from localStorage
       localStorage.removeItem('user');
