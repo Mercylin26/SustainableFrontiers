@@ -55,7 +55,7 @@ export default function FacultyAttendance() {
       if (!user?.id) {
         throw new Error("User not authenticated");
       }
-      return apiRequest('POST', '/api/attendance/qr-code', {
+      return apiRequest('POST', '/api/protected/attendance/qr-code', {
         facultyId: user.id,
         subjectId: parseInt(data.subjectId),
         date: data.date,

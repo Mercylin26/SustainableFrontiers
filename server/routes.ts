@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // EVENT ROUTES
-  app.post("/api/events", async (req, res) => {
+  app.post("/api/protected/events", async (req, res) => {
     try {
       const eventData = insertEventSchema.parse(req.body);
       const event = await storage.createEvent(eventData);
@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // NOTES ROUTES
-  app.post("/api/notes", async (req, res) => {
+  app.post("/api/protected/notes", async (req, res) => {
     try {
       const noteData = insertNoteSchema.parse(req.body);
       const note = await storage.createNote(noteData);
