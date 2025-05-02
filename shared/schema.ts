@@ -72,11 +72,12 @@ export const events = pgTable("events", {
   title: text("title").notNull(),
   description: text("description"),
   location: text("location"),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
-  facultyId: integer("faculty_id").notNull(),
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date").notNull(),
+  facultyId: integer("faculty_id"),
   departmentId: integer("department_id"),
   year: text("year"), // Optional, for year-specific events
+  type: text("type"), // Event type (cultural, technical, etc.)
 });
 
 // Notes (Syllabus & Notes)
