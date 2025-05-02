@@ -117,6 +117,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(400).json(handleZodError(error));
     }
   });
+  
+  // Faculty can create their own subjects/courses
+  app.post("/api/protected/subjects", async (req, res) => {
+    try {
+      const user = req.user as Express.User;
+      const subjectData = insertSubjectSchema.parse({
+        ...req.body,
+        facultyId: user.id // Ensure the faculty ID is set to the current user's ID
+      });
+      
+      const subject = await storage.createSubject(subjectData);
+      res.json({ subject });
+    } catch (error) {
+      res.status(400).json(handleZodError(error));
+    }
+  });
 
   app.get("/api/subjects", async (req, res) => {
     try {

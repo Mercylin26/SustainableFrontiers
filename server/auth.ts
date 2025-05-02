@@ -14,7 +14,7 @@ const PostgresSessionStore = connectPg(session);
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User extends Omit<import("@shared/schema").User, 'password'> {}
   }
 }
 
