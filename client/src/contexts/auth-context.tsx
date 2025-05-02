@@ -214,6 +214,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           // Save user to localStorage for persistence
           localStorage.setItem('user', JSON.stringify(customUser));
+          localStorage.setItem('currentUser', JSON.stringify(customUser));
           
           setUser(customUser);
           
@@ -365,6 +366,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Save user to localStorage for persistence
         localStorage.setItem('user', JSON.stringify(customUser));
+        localStorage.setItem('currentUser', JSON.stringify(customUser));
         
         // Set the user in state
         setUser(customUser);

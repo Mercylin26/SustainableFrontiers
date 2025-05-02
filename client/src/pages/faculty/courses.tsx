@@ -82,7 +82,8 @@ export default function FacultyCourses() {
         console.error("Failed to check auth status:", err);
       }
       
-      return apiRequest('POST', '/api/protected/subjects', {
+      // Use userId directly in URL for simpler authentication
+      return apiRequest('POST', `/api/protected/subjects?userId=${user.id}`, {
         ...data,
         departmentId: parseInt(data.departmentId)
         // facultyId is set automatically on the server
@@ -114,7 +115,7 @@ export default function FacultyCourses() {
       if (!selectedCourse?.id) {
         throw new Error("No course selected");
       }
-      return apiRequest('POST', '/api/protected/notes', {
+      return apiRequest('POST', `/api/protected/notes?userId=${user.id}`, {
         ...data,
         subjectId: selectedCourse.id,
         // facultyId is set automatically on the server

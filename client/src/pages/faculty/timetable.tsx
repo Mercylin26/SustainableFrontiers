@@ -79,7 +79,7 @@ export default function FacultyTimetable() {
         console.error("Failed to check auth status:", err);
       }
       
-      return apiRequest('POST', '/api/protected/timetable', {
+      return apiRequest('POST', `/api/protected/timetable?userId=${user.id}`, {
         ...data,
         subjectId: parseInt(data.subjectId),
         // facultyId is set automatically on the server

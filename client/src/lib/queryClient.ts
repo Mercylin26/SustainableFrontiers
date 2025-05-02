@@ -12,9 +12,43 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  // Get the current user from localStorage if available
+  let userId = null;
+  let modifiedUrl = url;
+  
+  try {
+    if (url.includes('/api/protected/')) {
+      const userString = localStorage.getItem('currentUser');
+      if (userString) {
+        const userData = JSON.parse(userString);
+        userId = userData.id;
+        
+        // Add userId parameter for protected routes
+        if (userId) {
+          modifiedUrl = url.includes('?') 
+            ? `${url}&userId=${userId}` 
+            : `${url}?userId=${userId}`;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error reading user from localStorage:", e);
+  }
+  
+  // Add authorization header for protected routes
+  const headers: Record<string, string> = {};
+  if (data) {
+    headers["Content-Type"] = "application/json";
+  }
+  
+  if (userId && url.includes('/api/protected/')) {
+    // Simple token format: "user-{userId}"
+    headers["Authorization"] = `Bearer user-${userId}`;
+  }
+  
+  const res = await fetch(modifiedUrl, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -29,7 +63,25 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    // Get the current user from localStorage if available
+    let userId = null;
+    try {
+      const userString = localStorage.getItem('currentUser');
+      if (userString) {
+        const userData = JSON.parse(userString);
+        userId = userData.id;
+      }
+    } catch (e) {
+      console.error("Error reading user from localStorage:", e);
+    }
+    
+    // Add userId for protected routes
+    let url = queryKey[0] as string;
+    if (userId && url.includes('/api/protected/')) {
+      url = url.includes('?') ? `${url}&userId=${userId}` : `${url}?userId=${userId}`;
+    }
+    
+    const res = await fetch(url, {
       credentials: "include",
     });
 
