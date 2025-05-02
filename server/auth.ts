@@ -7,7 +7,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { pool } from "./db";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
-import { User, insertUserSchema } from "@shared/schema";
+import { User, insertUserSchema, UserRole } from "@shared/schema";
 
 const scryptAsync = promisify(scrypt);
 const PostgresSessionStore = connectPg(session);
@@ -205,7 +205,7 @@ export function setupAuth(app: Express) {
     
     // Only allow access to users with the admin role
     const user = req.user as Express.User;
-    if (user.role !== 'admin') {
+    if (user.role !== UserRole.ADMIN) {
       return res.status(403).json({ error: "Admin access required" });
     }
     
