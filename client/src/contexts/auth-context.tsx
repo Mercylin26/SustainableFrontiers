@@ -12,9 +12,10 @@ import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 // Define a custom user interface that extends FirebaseUser
 interface CustomUser {
   uid: string;
+  id: number;      // Database ID (important for API calls)
   email: string | null;
   displayName: string | null;
-  role: "student" | "faculty";
+  role: "student" | "faculty" | "admin";
   firstName: string;
   lastName: string;
   department?: string;
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 
                 const customUser: CustomUser = {
                   uid: firebaseUser.uid,
+                  id: dbUser.id,
                   email: firebaseUser.email,
                   displayName: firebaseUser.displayName,
                   role: dbUser.role,
@@ -87,6 +89,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             // If we can't get user data from database but have Firebase user
             const customUser: CustomUser = {
               uid: firebaseUser.uid,
+              id: -1, // Placeholder ID for Firebase-only users
               email: firebaseUser.email,
               displayName: firebaseUser.displayName,
               role: "student", // Default role
@@ -164,6 +167,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ email, password }),
+          credentials: 'include', // This is critical for storing cookies
         });
         
         const data = await response.json();
@@ -178,9 +182,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (dbUser) {
           const customUser: CustomUser = {
             uid: `local-${dbUser.id}`,
+            id: dbUser.id,
             email: dbUser.email,
             displayName: `${dbUser.firstName} ${dbUser.lastName}`,
-            role: dbUser.role as "student" | "faculty",
+            role: dbUser.role as "student" | "faculty" | "admin",
             firstName: dbUser.firstName,
             lastName: dbUser.lastName,
             department: dbUser.department,
@@ -315,6 +320,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(userDataForDB),
+          credentials: 'include', // This is critical for storing cookies
         });
         
         const data = await response.json();

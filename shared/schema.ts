@@ -6,6 +6,7 @@ import { z } from "zod";
 export const UserRole = {
   STUDENT: "student",
   FACULTY: "faculty",
+  ADMIN: "admin",
 } as const;
 
 export type UserRoleType = typeof UserRole[keyof typeof UserRole];
