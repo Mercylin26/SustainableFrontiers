@@ -150,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // TIMETABLE ROUTES
-  app.post("/api/timetable", async (req, res) => {
+  app.post("/api/protected/timetable", async (req, res) => {
     try {
       const entryData = insertTimetableEntrySchema.parse(req.body);
       const entry = await storage.createTimetableEntry(entryData);
@@ -177,7 +177,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ATTENDANCE ROUTES
-  app.post("/api/attendance", async (req, res) => {
+  app.post("/api/protected/attendance", async (req, res) => {
     try {
       const attendanceData = insertAttendanceRecordSchema.parse(req.body);
       const record = await storage.createAttendanceRecord(attendanceData);
@@ -214,7 +214,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/attendance/qr-code", async (req, res) => {
+  app.post("/api/protected/attendance/qr-code", async (req, res) => {
     try {
       const { facultyId, subjectId, date } = req.body;
       

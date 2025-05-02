@@ -47,7 +47,7 @@ export default function FacultyTimetable() {
       if (!user?.id) {
         throw new Error("User not authenticated");
       }
-      return apiRequest('POST', '/api/timetable', {
+      return apiRequest('POST', '/api/protected/timetable', {
         ...data,
         subjectId: parseInt(data.subjectId),
         facultyId: user.id,

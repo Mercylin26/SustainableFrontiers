@@ -49,7 +49,7 @@ export default function FacultyCourses() {
       if (!user?.id) {
         throw new Error("User not authenticated");
       }
-      return apiRequest('POST', '/api/subjects', {
+      return apiRequest('POST', '/api/protected/subjects', {
         ...data,
         departmentId: parseInt(data.departmentId),
         facultyId: user.id,
@@ -81,7 +81,7 @@ export default function FacultyCourses() {
       if (!selectedCourse?.id) {
         throw new Error("No course selected");
       }
-      return apiRequest('POST', '/api/notes', {
+      return apiRequest('POST', '/api/protected/notes', {
         ...data,
         subjectId: selectedCourse.id,
         facultyId: user.id,

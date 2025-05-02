@@ -85,7 +85,7 @@ export default function FacultyAttendance() {
       if (!user?.id) {
         throw new Error("User not authenticated");
       }
-      return apiRequest('POST', '/api/attendance', {
+      return apiRequest('POST', '/api/protected/attendance', {
         subjectId: parseInt(data.subjectId),
         studentId: parseInt(data.studentId),
         facultyId: user.id,
