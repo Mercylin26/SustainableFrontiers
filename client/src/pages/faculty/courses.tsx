@@ -46,10 +46,13 @@ export default function FacultyCourses() {
   // Create course mutation
   const createCourseMutation = useMutation({
     mutationFn: async (data: z.infer<typeof courseFormSchema>) => {
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
       return apiRequest('POST', '/api/subjects', {
         ...data,
         departmentId: parseInt(data.departmentId),
-        facultyId: user?.id,
+        facultyId: user.id,
       });
     },
     onSuccess: () => {
@@ -72,10 +75,16 @@ export default function FacultyCourses() {
   // Upload notes mutation
   const uploadNotesMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
+      if (!selectedCourse?.id) {
+        throw new Error("No course selected");
+      }
       return apiRequest('POST', '/api/notes', {
         ...data,
-        subjectId: selectedCourse?.id,
-        facultyId: user?.id,
+        subjectId: selectedCourse.id,
+        facultyId: user.id,
         uploadDate: new Date(),
       });
     },
