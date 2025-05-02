@@ -29,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
   // USER ROUTES
-  app.get("/api/users/:id", async (req, res) => {
+  app.get("/api/protected/users/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const user = await storage.getUser(id);
@@ -108,7 +108,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // SUBJECT ROUTES
-  app.post("/api/subjects", async (req, res) => {
+  app.post("/api/protected/subjects", async (req, res) => {
     try {
       const subjectData = insertSubjectSchema.parse(req.body);
       const subject = await storage.createSubject(subjectData);
