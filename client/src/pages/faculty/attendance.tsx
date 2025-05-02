@@ -402,11 +402,14 @@ export default function FacultyAttendance() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {coursesData?.subjects?.map((subject: any) => (
-                          <SelectItem key={subject.id} value={subject.id.toString()}>
-                            {subject.code} - {subject.name}
-                          </SelectItem>
-                        ))}
+                        {coursesData?.subjects?.length > 0 ? 
+                          coursesData.subjects.map((subject: any) => (
+                            <SelectItem key={subject.id} value={subject.id.toString()}>
+                              {subject.code} - {subject.name}
+                            </SelectItem>
+                          )) : 
+                          <SelectItem value="no-subjects">No subjects available</SelectItem>
+                        }
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -465,11 +468,14 @@ export default function FacultyAttendance() {
                   <SelectValue placeholder="Select Subject" />
                 </SelectTrigger>
                 <SelectContent>
-                  {coursesData?.subjects?.map((subject: any) => (
-                    <SelectItem key={subject.id} value={subject.id.toString()}>
-                      {subject.code} - {subject.name}
-                    </SelectItem>
-                  ))}
+                  {coursesData?.subjects?.length > 0 ? 
+                    coursesData.subjects.map((subject: any) => (
+                      <SelectItem key={subject.id} value={subject.id.toString()}>
+                        {subject.code} - {subject.name}
+                      </SelectItem>
+                    )) : 
+                    <SelectItem value="no-subjects">No subjects available</SelectItem>
+                  }
                 </SelectContent>
               </Select>
             </div>
@@ -484,11 +490,14 @@ export default function FacultyAttendance() {
                   <SelectValue placeholder="Select Student" />
                 </SelectTrigger>
                 <SelectContent>
-                  {studentsData?.users?.map((student: any) => (
-                    <SelectItem key={student.id} value={student.id.toString()}>
-                      {student.firstName} {student.lastName} ({student.collegeId})
-                    </SelectItem>
-                  ))}
+                  {studentsData?.users?.length > 0 ? 
+                    studentsData.users.map((student: any) => (
+                      <SelectItem key={student.id} value={student.id.toString()}>
+                        {student.firstName} {student.lastName} ({student.collegeId})
+                      </SelectItem>
+                    )) : 
+                    <SelectItem value="no-students">No students available</SelectItem>
+                  }
                 </SelectContent>
               </Select>
             </div>

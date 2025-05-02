@@ -272,9 +272,12 @@ export default function FacultyCourses() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {departmentsData?.departments?.map((dept: any) => (
-                          <SelectItem key={dept.id} value={String(dept.id)}>{dept.name}</SelectItem>
-                        )) || []}
+                        {departmentsData?.departments?.length > 0 ? 
+                          departmentsData.departments.map((dept: any) => (
+                            <SelectItem key={dept.id} value={String(dept.id)}>{dept.name}</SelectItem>
+                          )) : 
+                          <SelectItem value="no-departments">No departments available</SelectItem>
+                        }
                       </SelectContent>
                     </Select>
                     <FormMessage />

@@ -175,7 +175,7 @@ export default function FacultyTimetable() {
                             </SelectItem>
                           ))
                         ) : (
-                          <SelectItem value="none" disabled>No subjects available</SelectItem>
+                          <SelectItem value="no-subjects">No subjects available</SelectItem>
                         )}
                       </SelectContent>
                     </Select>
