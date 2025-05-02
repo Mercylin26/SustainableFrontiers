@@ -44,10 +44,13 @@ export default function FacultyTimetable() {
   // Create timetable entry mutation
   const createEntryMutation = useMutation({
     mutationFn: async (data: z.infer<typeof timetableEntrySchema>) => {
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
       return apiRequest('POST', '/api/timetable', {
         ...data,
         subjectId: parseInt(data.subjectId),
-        facultyId: user?.id,
+        facultyId: user.id,
       });
     },
     onSuccess: () => {

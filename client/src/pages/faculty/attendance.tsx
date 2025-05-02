@@ -52,8 +52,11 @@ export default function FacultyAttendance() {
   // Generate QR code mutation
   const generateQRMutation = useMutation({
     mutationFn: async (data: z.infer<typeof generateQRSchema>) => {
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
       return apiRequest('POST', '/api/attendance/qr-code', {
-        facultyId: user?.id,
+        facultyId: user.id,
         subjectId: parseInt(data.subjectId),
         date: data.date,
       });
@@ -79,10 +82,13 @@ export default function FacultyAttendance() {
   // Mark attendance manually mutation
   const markAttendanceMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (!user?.id) {
+        throw new Error("User not authenticated");
+      }
       return apiRequest('POST', '/api/attendance', {
         subjectId: parseInt(data.subjectId),
         studentId: parseInt(data.studentId),
-        facultyId: user?.id,
+        facultyId: user.id,
         date: new Date(data.date),
         status: data.status,
       });
