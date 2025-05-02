@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { departments, years } from "@/lib/utils";
+import { years } from "@/lib/utils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -31,6 +31,11 @@ export default function FacultyCourses() {
   const [isAddCourseOpen, setIsAddCourseOpen] = useState(false);
   const [isUploadNotesOpen, setIsUploadNotesOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
+
+  // Fetch departments
+  const { data: departmentsData } = useQuery({
+    queryKey: ['/api/departments'],
+  });
 
   // Fetch courses
   const { data: coursesData, isLoading } = useQuery({
@@ -167,7 +172,7 @@ export default function FacultyCourses() {
                         <TableCell className="font-medium">{course.code}</TableCell>
                         <TableCell>{course.name}</TableCell>
                         <TableCell>
-                          {departments.find(d => d.value === course.department)?.label || course.department}
+                          {departmentsData?.departments?.find((d: any) => d.id === course.departmentId)?.name || course.departmentId}
                         </TableCell>
                         <TableCell>
                           {years.find(y => y.value === course.year)?.label || course.year}
@@ -258,9 +263,9 @@ export default function FacultyCourses() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {departments.map((dept) => (
-                          <SelectItem key={dept.value} value={dept.value}>{dept.label}</SelectItem>
-                        ))}
+                        {departmentsData?.departments?.map((dept: any) => (
+                          <SelectItem key={dept.id} value={String(dept.id)}>{dept.name}</SelectItem>
+                        )) || []}
                       </SelectContent>
                     </Select>
                     <FormMessage />
