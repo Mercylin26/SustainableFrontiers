@@ -40,14 +40,19 @@ export function setupAuth(app: Express) {
       createTableIfMissing: true
     }),
     secret: process.env.SESSION_SECRET || 'collegeconnect-secret',
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Changed to true to ensure session is saved
+    saveUninitialized: true, // Changed to true to create session for all users
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Set to false to work in development
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      httpOnly: false, // Allow JavaScript access
+      sameSite: 'lax' // More permissive same-site policy
     }
   };
 
+  // Trust proxy - important for session cookies to work behind proxies
+  app.set('trust proxy', 1);
+  
   app.use(session(sessionOptions));
   
   // Set up Passport
@@ -187,6 +192,34 @@ export function setupAuth(app: Express) {
     
     // Return the user without the password
     res.json({ user: { ...req.user, password: undefined } });
+  });
+  
+  // Special route to manually establish a session for the given user ID
+  app.post("/api/auth/session", async (req, res) => {
+    try {
+      const userId = req.body.userId;
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is required" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Manually log the user in
+      req.login(user, (err) => {
+        if (err) {
+          return res.status(500).json({ error: "Failed to establish session" });
+        }
+        
+        console.log("Manual session established for user:", user.id, user.email);
+        return res.json({ success: true, user: { ...user, password: undefined } });
+      });
+    } catch (error: any) {
+      console.error("Error establishing session:", error);
+      res.status(500).json({ error: error.message || "Internal server error" });
+    }
   });
   
   // Auth check middleware

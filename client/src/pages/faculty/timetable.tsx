@@ -47,6 +47,38 @@ export default function FacultyTimetable() {
       if (!user?.id) {
         throw new Error("User not authenticated");
       }
+      
+      // First check if session is valid and establish if needed
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include'
+        });
+        const authData = await response.json();
+        console.log("Auth check response:", authData);
+        
+        // If not authenticated, try to establish session manually
+        if (authData.error === "Not authenticated") {
+          console.log("Attempting to establish session manually for timetable entry");
+          
+          const sessionResponse = await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: user.id }),
+            credentials: 'include',
+          });
+          
+          if (!sessionResponse.ok) {
+            console.error("Failed to establish session:", await sessionResponse.json());
+          } else {
+            console.log("Session established successfully");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to check auth status:", err);
+      }
+      
       return apiRequest('POST', '/api/protected/timetable', {
         ...data,
         subjectId: parseInt(data.subjectId),

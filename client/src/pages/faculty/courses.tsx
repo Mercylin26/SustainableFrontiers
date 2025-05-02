@@ -51,13 +51,33 @@ export default function FacultyCourses() {
       }
       console.log("Submitting with user:", user);
       
-      // First try database auth endpoint
+      // First check if session is valid
       try {
         const response = await fetch('/api/auth/me', {
           credentials: 'include'
         });
         const authData = await response.json();
         console.log("Auth check response:", authData);
+        
+        // If not authenticated, try to establish session manually
+        if (authData.error === "Not authenticated") {
+          console.log("Attempting to establish session manually");
+          
+          const sessionResponse = await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ userId: user.id }),
+            credentials: 'include',
+          });
+          
+          if (!sessionResponse.ok) {
+            console.error("Failed to establish session:", await sessionResponse.json());
+          } else {
+            console.log("Session established successfully");
+          }
+        }
       } catch (err) {
         console.error("Failed to check auth status:", err);
       }

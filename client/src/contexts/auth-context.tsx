@@ -176,6 +176,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
           throw new Error(data.error || 'Invalid email or password');
         }
         
+        console.log("Login response:", data);
+        
+        // Double check the session was established
+        try {
+          const sessionCheck = await fetch('/api/auth/me', {
+            credentials: 'include'
+          });
+          console.log("Session check status:", sessionCheck.status);
+          if (sessionCheck.ok) {
+            console.log("Session verified after login");
+          } else {
+            console.warn("Session verification failed, may have login issues");
+          }
+        } catch (e) {
+          console.error("Error checking session:", e);
+        }
+        
         // Create a custom user from the database user
         const dbUser = data.user;
         
