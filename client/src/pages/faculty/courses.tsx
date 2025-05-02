@@ -52,7 +52,7 @@ export default function FacultyCourses() {
       return apiRequest('POST', '/api/protected/subjects', {
         ...data,
         departmentId: parseInt(data.departmentId),
-        facultyId: user.id,
+        // facultyId is set automatically on the server
       });
     },
     onSuccess: () => {
@@ -84,7 +84,7 @@ export default function FacultyCourses() {
       return apiRequest('POST', '/api/protected/notes', {
         ...data,
         subjectId: selectedCourse.id,
-        facultyId: user.id,
+        // facultyId is set automatically on the server
         uploadDate: new Date(),
       });
     },

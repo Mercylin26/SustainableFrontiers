@@ -50,7 +50,7 @@ export default function FacultyTimetable() {
       return apiRequest('POST', '/api/protected/timetable', {
         ...data,
         subjectId: parseInt(data.subjectId),
-        facultyId: user.id,
+        // facultyId is set automatically on the server
       });
     },
     onSuccess: () => {

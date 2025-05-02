@@ -56,7 +56,7 @@ export default function FacultyAttendance() {
         throw new Error("User not authenticated");
       }
       return apiRequest('POST', '/api/protected/attendance/qr-code', {
-        facultyId: user.id,
+        // facultyId is taken from the authenticated user now
         subjectId: parseInt(data.subjectId),
         date: data.date,
       });
@@ -88,7 +88,7 @@ export default function FacultyAttendance() {
       return apiRequest('POST', '/api/protected/attendance', {
         subjectId: parseInt(data.subjectId),
         studentId: parseInt(data.studentId),
-        facultyId: user.id,
+        // facultyId is automatically set on the server from the authenticated user
         date: new Date(data.date),
         status: data.status,
       });
