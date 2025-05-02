@@ -47,7 +47,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Check if user is logged in
   useEffect(() => {
-    // Try to listen for Firebase auth state changes
+    // First, try to get user from localStorage
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser && parsedUser.id) {
+          console.log("Restored user from localStorage:", parsedUser);
+          setUser(parsedUser);
+          setLoading(false);
+          return; // Skip the Firebase check if we have a valid user in localStorage
+        }
+      }
+    } catch (e) {
+      console.error("Error reading user from localStorage:", e);
+    }
+    
+    // If no valid user in localStorage, try to listen for Firebase auth state changes
     let firebaseUnsubscribe = () => {};
     
     try {
@@ -430,6 +446,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       // Clear user from state and from localStorage
       localStorage.removeItem('user');
+      localStorage.removeItem('currentUser');
       setUser(null);
       
       // Try to also logout from Firebase (if available)
