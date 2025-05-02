@@ -46,12 +46,25 @@ export default function FacultyCourses() {
   // Create course mutation
   const createCourseMutation = useMutation({
     mutationFn: async (data: z.infer<typeof courseFormSchema>) => {
-      if (!user?.id) {
+      if (!user) {
         throw new Error("User not authenticated");
       }
+      console.log("Submitting with user:", user);
+      
+      // First try database auth endpoint
+      try {
+        const response = await fetch('/api/auth/me', {
+          credentials: 'include'
+        });
+        const authData = await response.json();
+        console.log("Auth check response:", authData);
+      } catch (err) {
+        console.error("Failed to check auth status:", err);
+      }
+      
       return apiRequest('POST', '/api/protected/subjects', {
         ...data,
-        departmentId: parseInt(data.departmentId),
+        departmentId: parseInt(data.departmentId)
         // facultyId is set automatically on the server
       });
     },
