@@ -190,6 +190,16 @@ export function setupAuth(app: Express) {
   });
   
   // Auth check middleware
+  // Debug middleware to log session data
+  app.use((req, res, next) => {
+    console.log('Session ID:', req.sessionID);
+    console.log('Is authenticated:', req.isAuthenticated());
+    if (req.user) {
+      console.log('User:', req.user.id, req.user.email);
+    }
+    next();
+  });
+
   app.use("/api/protected/*", (req, res, next) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: "Not authenticated" });
