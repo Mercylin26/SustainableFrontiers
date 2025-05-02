@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,7 +55,20 @@ const formSchema = z.object({
 export default function Signup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { signup, loading } = useAuth();
+  const { user, signup, loading } = useAuth();
+  
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (user) {
+      if (user.role === "student") {
+        navigate("/student/dashboard");
+      } else if (user.role === "faculty") {
+        navigate("/faculty/dashboard");
+      } else {
+        navigate("/");
+      }
+    }
+  }, [user, navigate]);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

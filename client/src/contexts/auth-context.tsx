@@ -204,6 +204,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
             console.error("Firebase login failed, using database authentication only:", firebaseError);
           }
           
+          // Redirect based on user role
+          if (customUser.role === "student") {
+            navigate("/student/dashboard");
+          } else if (customUser.role === "faculty") {
+            navigate("/faculty/dashboard");
+          } else {
+            navigate("/");
+          }
+          
           toast({
             title: "Login Successful",
             description: `Welcome back, ${dbUser.firstName}!`,
@@ -237,6 +246,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
             };
             
             setUser(customUser);
+            
+            // Redirect based on user role
+            if (customUser.role === "student") {
+              navigate("/student/dashboard");
+            } else if (customUser.role === "faculty") {
+              navigate("/faculty/dashboard");
+            } else {
+              navigate("/");
+            }
             
             toast({
               title: "Login Successful",
@@ -333,6 +351,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
         } catch (firebaseError) {
           // Continue without Firebase authentication if it fails
           console.error("Firebase registration failed, using database authentication only:", firebaseError);
+        }
+        
+        // Redirect based on user role
+        if (customUser.role === "student") {
+          navigate("/student/dashboard");
+        } else if (customUser.role === "faculty") {
+          navigate("/faculty/dashboard");
+        } else {
+          navigate("/");
         }
         
         toast({
