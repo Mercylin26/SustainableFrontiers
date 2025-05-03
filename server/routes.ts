@@ -29,8 +29,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
   
-  // Apply the dev auth middleware to all protected routes
-  app.use('/api/protected', devAuthMiddleware);
+  // Apply the dev auth middleware to all API routes
+  app.use('/api', devAuthMiddleware);
 
   // USER ROUTES
   app.get("/api/protected/users/:id", async (req, res) => {

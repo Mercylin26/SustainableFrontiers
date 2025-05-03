@@ -35,15 +35,24 @@ export async function apiRequest(
     console.error("Error reading user from localStorage:", e);
   }
   
-  // Add authorization header for protected routes
+  // Add authorization header for API routes
   const headers: Record<string, string> = {};
   if (data) {
     headers["Content-Type"] = "application/json";
   }
   
-  if (userId && url.includes('/api/protected/')) {
-    // Simple token format: "user-{userId}"
-    headers["Authorization"] = `Bearer user-${userId}`;
+  // Add authentication headers for all API requests
+  try {
+    const userString = localStorage.getItem('currentUser');
+    if (userString) {
+      const userData = JSON.parse(userString);
+      // Include user info in headers for all API requests
+      headers["x-user-id"] = userData.id;
+      headers["x-user-role"] = userData.role || "faculty";
+      headers["x-current-user"] = userString;
+    }
+  } catch (e) {
+    console.error("Error adding auth headers:", e);
   }
   
   const res = await fetch(modifiedUrl, {
@@ -81,8 +90,24 @@ export const getQueryFn: <T>(options: {
       url = url.includes('?') ? `${url}&userId=${userId}` : `${url}?userId=${userId}`;
     }
     
+    // Add authentication headers for all API requests
+    const headers: Record<string, string> = {};
+    try {
+      const userString = localStorage.getItem('currentUser');
+      if (userString) {
+        const userData = JSON.parse(userString);
+        // Include user info in headers for all API requests
+        headers["x-user-id"] = userData.id;
+        headers["x-user-role"] = userData.role || "faculty";
+        headers["x-current-user"] = userString;
+      }
+    } catch (e) {
+      console.error("Error adding auth headers:", e);
+    }
+    
     const res = await fetch(url, {
       credentials: "include",
+      headers: headers
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
