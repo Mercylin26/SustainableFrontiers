@@ -1,7 +1,8 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { devAuthMiddleware } from "./dev-auth";
 import { 
   insertUserSchema, 
   insertDepartmentSchema, 
@@ -27,6 +28,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Set up authentication routes
   setupAuth(app);
+  
+  // Apply the dev auth middleware to all protected routes
+  app.use('/api/protected', devAuthMiddleware);
 
   // USER ROUTES
   app.get("/api/protected/users/:id", async (req, res) => {
