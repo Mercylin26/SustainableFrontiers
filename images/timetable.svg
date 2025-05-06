@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f5f5f5"/>
+  
+  <!-- Header -->
+  <rect width="800" height="70" fill="#4f46e5"/>
+  <text x="40" y="45" font-family="Arial" font-size="24" fill="white" font-weight="bold">CollegeConnect</text>
+  
+  <!-- Sidebar -->
+  <rect x="0" y="70" width="200" height="530" fill="#1e293b"/>
+  
+  <!-- Sidebar Menu Items -->
+  <text x="20" y="170" font-family="Arial" font-size="16" fill="#94a3b8">Dashboard</text>
+  <rect x="0" y="190" width="200" height="50" fill="#2d3a4f"/>
+  <text x="20" y="220" font-family="Arial" font-size="16" fill="white">Timetable</text>
+  <text x="20" y="270" font-family="Arial" font-size="16" fill="#94a3b8">Courses</text>
+  <text x="20" y="320" font-family="Arial" font-size="16" fill="#94a3b8">Attendance</text>
+  <text x="20" y="370" font-family="Arial" font-size="16" fill="#94a3b8">Events</text>
+  <text x="20" y="420" font-family="Arial" font-size="16" fill="#94a3b8">Profile</text>
+  
+  <!-- Main Content Area -->
+  <rect x="200" y="70" width="600" height="530" fill="white"/>
+  
+  <!-- Page Title -->
+  <text x="240" y="110" font-family="Arial" font-size="20" fill="#111827" font-weight="bold">Weekly Timetable</text>
+  
+  <!-- Day selector tabs -->
+  <rect x="240" y="130" width="520" height="40" fill="#f9fafb" rx="4"/>
+  <rect x="240" y="130" width="104" height="40" fill="#eef2ff" rx="4"/>
+  <text x="275" y="155" font-family="Arial" font-size="14" fill="#4f46e5" font-weight="bold">Mon</text>
+  <text x="380" y="155" font-family="Arial" font-size="14" fill="#6b7280">Tue</text>
+  <text x="485" y="155" font-family="Arial" font-size="14" fill="#6b7280">Wed</text>
+  <text x="590" y="155" font-family="Arial" font-size="14" fill="#6b7280">Thu</text>
+  <text x="695" y="155" font-family="Arial" font-size="14" fill="#6b7280">Fri</text>
+  
+  <!-- Timetable Header -->
+  <rect x="240" y="180" width="90" height="40" fill="#f3f4f6"/>
+  <text x="265" y="205" font-family="Arial" font-size="14" fill="#374151" font-weight="bold">Time</text>
+  
+  <rect x="330" y="180" width="430" height="40" fill="#f3f4f6"/>
+  <text x="495" y="205" font-family="Arial" font-size="14" fill="#374151" font-weight="bold">Monday Schedule</text>
+  
+  <!-- Time Slots -->
+  <rect x="240" y="220" width="90" height="60" fill="#f9fafb"/>
+  <text x="246" y="255" font-family="Arial" font-size="13" fill="#374151">8:00 - 10:00</text>
+  
+  <rect x="240" y="280" width="90" height="60" fill="#f9fafb"/>
+  <text x="246" y="315" font-family="Arial" font-size="13" fill="#374151">10:00 - 12:00</text>
+  
+  <rect x="240" y="340" width="90" height="60" fill="#f9fafb"/>
+  <text x="246" y="375" font-family="Arial" font-size="13" fill="#374151">12:00 - 14:00</text>
+  
+  <rect x="240" y="400" width="90" height="60" fill="#f9fafb"/>
+  <text x="246" y="435" font-family="Arial" font-size="13" fill="#374151">14:00 - 16:00</text>
+  
+  <rect x="240" y="460" width="90" height="60" fill="#f9fafb"/>
+  <text x="246" y="495" font-family="Arial" font-size="13" fill="#374151">16:00 - 18:00</text>
+  
+  <!-- Class Entries -->
+  <rect x="330" y="220" width="430" height="60" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="330" y="220" width="430" height="60" fill="#eef2ff" stroke="#c7d2fe" rx="4"/>
+  <text x="344" y="245" font-family="Arial" font-size="14" fill="#4338ca" font-weight="bold">Computer Science 101</text>
+  <text x="344" y="265" font-family="Arial" font-size="13" fill="#6366f1">Room 302 | Dr. Smith</text>
+  
+  <rect x="330" y="280" width="430" height="60" fill="#ffffff" stroke="#e5e7eb"/>
+  
+  <rect x="330" y="340" width="430" height="60" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="510" y="375" font-family="Arial" font-size="13" fill="#9ca3af" font-style="italic">Lunch Break</text>
+  
+  <rect x="330" y="400" width="430" height="60" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="330" y="400" width="430" height="60" fill="#fff7ed" stroke="#ffedd5" rx="4"/>
+  <text x="344" y="425" font-family="Arial" font-size="14" fill="#c2410c" font-weight="bold">Advanced Algorithms</text>
+  <text x="344" y="445" font-family="Arial" font-size="13" fill="#f97316">Room 405 | Dr. Johnson</text>
+  
+  <rect x="330" y="460" width="430" height="60" fill="#ffffff" stroke="#e5e7eb"/>
+  <rect x="330" y="460" width="430" height="60" fill="#f0fdfa" stroke="#ccfbf1" rx="4"/>
+  <text x="344" y="485" font-family="Arial" font-size="14" fill="#0f766e" font-weight="bold">Database Systems</text>
+  <text x="344" y="505" font-family="Arial" font-size="13" fill="#14b8a6">Lab 3 | Dr. Garcia</text>
+  
+  <!-- Add Class Button -->
+  <rect x="640" y="530" width="120" height="40" rx="20" fill="#4f46e5"/>
+  <text x="665" y="555" font-family="Arial" font-size="14" fill="white" font-weight="bold">Add Class</text>
+</svg>
