@@ -227,15 +227,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/protected/attendance", async (req, res) => {
     try {
       const user = req.user as Express.User;
+      const { facultyId, dev, ...restData } = req.body;
+      
+      // Log the request for debugging
+      console.log("MANUAL ATTENDANCE REQUEST:", {
+        userFromSession: user?.id,
+        userFromBody: facultyId,
+        isDev: !!dev
+      });
+      
+      // Use facultyId from body as fallback for development
+      let effectiveFacultyId = user?.id;
+      
+      // If we're in dev mode and have no user, use the provided facultyId or default to 1
+      if ((!effectiveFacultyId || effectiveFacultyId <= 0) && (dev === true || req.query.dev === 'true')) {
+        effectiveFacultyId = facultyId || 1;
+        console.log("Using development facultyId for manual attendance:", effectiveFacultyId);
+      }
+      
+      if (!effectiveFacultyId) {
+        return res.status(401).json({ error: "Authentication required. No valid faculty ID found." });
+      }
+      
       const attendanceData = insertAttendanceRecordSchema.parse({
-        ...req.body,
-        facultyId: user.id // Ensure the faculty ID is set to the current user's ID
+        ...restData,
+        facultyId: effectiveFacultyId // Use the effective faculty ID
       });
       
       const record = await storage.createAttendanceRecord(attendanceData);
+      console.log("Attendance record created successfully for faculty:", effectiveFacultyId);
       res.json({ record });
     } catch (error) {
-      res.status(400).json(handleZodError(error));
+      console.error("Manual attendance error:", error);
+      if (error instanceof ZodError) {
+        res.status(400).json(handleZodError(error));
+      } else {
+        res.status(500).json({ error: String(error) });
+      }
     }
   });
 
@@ -269,20 +297,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/protected/attendance/qr-code", async (req, res) => {
     try {
       const user = req.user as Express.User;
-      const { subjectId, date } = req.body;
+      const { subjectId, date, facultyId, dev } = req.body;
       
       if (!subjectId || !date) {
         return res.status(400).json({ error: "Subject ID and date are required" });
       }
       
+      // Log the request for debugging
+      console.log("QR CODE GENERATION REQUEST:", {
+        userFromSession: user?.id,
+        userFromBody: facultyId,
+        subjectId,
+        date,
+        isDev: !!dev
+      });
+      
+      // Use facultyId from body as fallback for development
+      let effectiveFacultyId = user?.id;
+      
+      // If we're in dev mode and have no user, use the provided facultyId or default to 1
+      if ((!effectiveFacultyId || effectiveFacultyId <= 0) && (dev === true || req.query.dev === 'true')) {
+        effectiveFacultyId = facultyId || 1;
+        console.log("Using development facultyId:", effectiveFacultyId);
+      }
+      
+      if (!effectiveFacultyId) {
+        return res.status(401).json({ error: "Authentication required. No valid faculty ID found." });
+      }
+      
       const qrCode = await storage.generateAttendanceQrCode(
-        user.id, // Use the authenticated faculty member's ID
+        effectiveFacultyId,
         parseInt(subjectId), 
         date
       );
       
+      console.log("QR code generated successfully for faculty:", effectiveFacultyId);
       res.json({ qrCode });
     } catch (error) {
+      console.error("QR code generation error:", error);
       res.status(500).json({ error: String(error) });
     }
   });
