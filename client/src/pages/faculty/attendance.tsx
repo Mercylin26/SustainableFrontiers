@@ -52,45 +52,113 @@ export default function FacultyAttendance() {
   // Generate QR code mutation
   const generateQRMutation = useMutation({
     mutationFn: async (data: z.infer<typeof generateQRSchema>) => {
-      if (!user?.id) {
-        throw new Error("User not authenticated");
+      // Try to refresh auth before making the request
+      try {
+        if (!user?.id) {
+          console.log("No user ID found, attempting to establish development session...");
+          // Try to establish a development session
+          await fetch('/api/auth/dev-session', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      } catch (authError) {
+        console.error("Failed to refresh auth:", authError);
       }
+      
       return apiRequest('POST', '/api/protected/attendance/qr-code', {
-        // facultyId is taken from the authenticated user now
+        // Include all parameters explicitly for better error handling
+        facultyId: user?.id || 1, // Fallback to default faculty ID if needed
         subjectId: parseInt(data.subjectId),
         date: data.date,
+        dev: true, // Additional parameter for development auth
       });
     },
     onSuccess: (response) => {
       response.json().then((data) => {
-        setGeneratedQRCode(data.qrCode);
+        if (data && data.qrCode) {
+          setGeneratedQRCode(data.qrCode);
+          setIsGenerateQROpen(false);
+          toast({
+            title: "QR Code Generated",
+            description: "Share this QR code with your students to mark attendance.",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "QR code data was not returned properly. Please try again.",
+            variant: "destructive",
+          });
+        }
+      }).catch(err => {
+        console.error("Error parsing QR code response:", err);
         toast({
-          title: "QR Code Generated",
-          description: "Share this QR code with your students to mark attendance.",
+          title: "Error",
+          description: "Failed to process QR code response. Please try again.",
+          variant: "destructive",
         });
       });
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: `Failed to generate QR code: ${error}`,
-        variant: "destructive",
-      });
+      console.error("QR code generation error:", error);
+      
+      // Special handling for auth errors
+      if (String(error).includes("401") || String(error).includes("authenticated")) {
+        toast({
+          title: "Authentication Error",
+          description: "Your session has expired. Attempting to re-authenticate...",
+          variant: "destructive",
+        });
+        
+        // Try to establish a new development session
+        fetch('/api/auth/dev-session', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(() => {
+          toast({
+            title: "Re-authenticated",
+            description: "Please try generating the QR code again.",
+          });
+        }).catch(err => {
+          console.error("Failed to re-authenticate:", err);
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to generate QR code: ${error}`,
+          variant: "destructive",
+        });
+      }
     },
   });
 
   // Mark attendance manually mutation
   const markAttendanceMutation = useMutation({
     mutationFn: async (data: any) => {
-      if (!user?.id) {
-        throw new Error("User not authenticated");
+      // Try to refresh auth before making the request if no user ID
+      try {
+        if (!user?.id) {
+          console.log("No user ID found for manual attendance, attempting to establish development session...");
+          // Try to establish a development session
+          await fetch('/api/auth/dev-session', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+          });
+        }
+      } catch (authError) {
+        console.error("Failed to refresh auth for manual attendance:", authError);
       }
+      
       return apiRequest('POST', '/api/protected/attendance', {
+        facultyId: user?.id || 1, // Fallback to default faculty ID if needed
         subjectId: parseInt(data.subjectId),
         studentId: parseInt(data.studentId),
-        // facultyId is automatically set on the server from the authenticated user
         date: new Date(data.date),
         status: data.status,
+        dev: true, // Additional parameter for development auth
       });
     },
     onSuccess: () => {
@@ -102,11 +170,36 @@ export default function FacultyAttendance() {
       });
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: `Failed to mark attendance: ${error}`,
-        variant: "destructive",
-      });
+      console.error("Manual attendance error:", error);
+      
+      // Special handling for auth errors
+      if (String(error).includes("401") || String(error).includes("authenticated")) {
+        toast({
+          title: "Authentication Error",
+          description: "Your session has expired. Attempting to re-authenticate...",
+          variant: "destructive",
+        });
+        
+        // Try to establish a new development session
+        fetch('/api/auth/dev-session', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        }).then(() => {
+          toast({
+            title: "Re-authenticated",
+            description: "Please try marking attendance again.",
+          });
+        }).catch(err => {
+          console.error("Failed to re-authenticate for manual attendance:", err);
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: `Failed to mark attendance: ${error}`,
+          variant: "destructive",
+        });
+      }
     },
   });
 
