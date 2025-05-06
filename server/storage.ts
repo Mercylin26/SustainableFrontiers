@@ -837,5 +837,6 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Use database storage instead of memory storage
-export const storage = new DatabaseStorage();
+// Use in-memory storage until database issues are resolved
+// This will allow the application to work without database connectivity
+export const storage = new MemStorage();
