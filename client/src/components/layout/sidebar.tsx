@@ -45,16 +45,15 @@ export default function Sidebar() {
           <ul>
             {navItems.map((item) => (
               <li key={item.href} className="mb-1">
-                <Link href={item.href}>
-                  <a
-                    className={cn(
-                      "flex items-center p-3 rounded-md text-neutral-700 hover:text-primary hover:bg-neutral-100 transition-colors",
-                      location === item.href && "bg-primary bg-opacity-10 text-primary border-l-4 border-primary"
-                    )}
-                  >
-                    <span className="material-icons mr-3">{item.icon}</span>
-                    {item.label}
-                  </a>
+                <Link 
+                  href={item.href}
+                  className={cn(
+                    "flex items-center p-3 rounded-md text-neutral-700 hover:text-primary hover:bg-neutral-100 transition-colors",
+                    location === item.href && "bg-primary bg-opacity-10 text-primary border-l-4 border-primary"
+                  )}
+                >
+                  <span className="material-icons mr-3">{item.icon}</span>
+                  {item.label}
                 </Link>
               </li>
             ))}
