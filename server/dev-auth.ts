@@ -2,7 +2,7 @@
 // This file provides a development-only authentication bypass
 // to fix the "User not authenticated" errors with faculty features
 
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 // This middleware automatically authenticates requests to protected routes
 export const devAuthMiddleware = (req: Request, res: Response, next: NextFunction) => {

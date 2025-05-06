@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CollegeConnect - Preview</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    header {
+      background-color: #4f46e5;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .feature-card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .feature-card h3 {
+      color: #4f46e5;
+      margin-top: 0;
+    }
+    .feature-card p {
+      color: #666;
+      line-height: 1.5;
+    }
+    .dashboard-preview {
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      height: 300px;
+      margin-top: 30px;
+      background-color: white;
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar {
+      position: absolute;
+      width: 200px;
+      height: 100%;
+      background-color: #1e293b;
+      color: white;
+      padding-top: 20px;
+    }
+    .sidebar-item {
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .sidebar-item:hover, .sidebar-item.active {
+      background-color: #2d3a4f;
+    }
+    .main-content {
+      margin-left: 200px;
+      padding: 20px;
+    }
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .timetable-item {
+      background-color: #eef2ff;
+      border-radius: 4px;
+      padding: 10px;
+      font-size: 12px;
+    }
+    footer {
+      margin-top: 50px;
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CollegeConnect</h1>
+    <p>A comprehensive college management system</p>
+  </header>
+  
+  <div class="container">
+    <div class="dashboard-preview">
+      <div class="sidebar">
+        <div class="sidebar-item active">Dashboard</div>
+        <div class="sidebar-item">Timetable</div>
+        <div class="sidebar-item">Courses</div>
+        <div class="sidebar-item">Attendance</div>
+        <div class="sidebar-item">Events</div>
+        <div class="sidebar-item">Profile</div>
+      </div>
+      <div class="main-content">
+        <h2>Faculty Dashboard</h2>
+        <p>Today's Schedule</p>
+        <div class="timetable-grid">
+          <div class="timetable-item">
+            <strong>9:00 AM</strong><br>
+            Computer Science 101<br>
+            Room 302
+          </div>
+          <div class="timetable-item">
+            <strong>11:00 AM</strong><br>
+            Advanced Algorithms<br>
+            Room 405
+          </div>
+          <div class="timetable-item">
+            <strong>2:00 PM</strong><br>
+            Database Systems<br>
+            Lab 3
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>Real-time Attendance Tracking</h3>
+        <p>Generate QR codes for instant attendance tracking in classes. Students can scan and mark their presence instantly.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Course Management</h3>
+        <p>Create and manage courses, upload materials, and organize curriculum content effectively.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Events Calendar</h3>
+        <p>Stay updated with college events, workshops, and important dates through an interactive calendar.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Student Progress Monitoring</h3>
+        <p>Track academic progress, attendance statistics, and performance metrics in real-time.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Mobile Responsive</h3>
+        <p>Access all features seamlessly from any device with a fully responsive design.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Secure Authentication</h3>
+        <p>Role-based access control with secure authentication for faculty and students.</p>
+      </div>
+    </div>
+  </div>
+  
+  <footer>
+    <p>© 2025 CollegeConnect - A Comprehensive College Management System</p>
+  </footer>
+</body>
+</html>
