@@ -8,9 +8,11 @@ import { pool } from "./db";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { User, insertUserSchema, UserRole } from "@shared/schema";
+import memorystore from "memorystore";
 
 const scryptAsync = promisify(scrypt);
 const PostgresSessionStore = connectPg(session);
+const MemoryStore = memorystore(session);
 
 declare global {
   namespace Express {
@@ -32,13 +34,17 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Set up session middleware
+  // Set up session middleware with MemoryStore by default
+  let sessionStore;
+  
+  // Always use MemoryStore since PostgreSQL is having connection issues
+  console.log("Using in-memory session store");
+  sessionStore = new MemoryStore({
+    checkPeriod: 86400000 // Clear expired sessions every 24h
+  });
+  
   const sessionOptions: session.SessionOptions = {
-    store: new PostgresSessionStore({
-      pool,
-      tableName: 'user_sessions',
-      createTableIfMissing: true
-    }),
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || 'collegeconnect-secret',
     resave: true, // Changed to true to ensure session is saved
     saveUninitialized: true, // Changed to true to create session for all users
